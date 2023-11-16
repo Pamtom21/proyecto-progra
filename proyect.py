@@ -14,13 +14,8 @@ class animal(organismo):
         self.edad= 1
     def __str__(self) -> str:
         return f'{self.icono}'
-    def cazar(self, obj):
+    def cazar(self):
         self.velocidad = 2
-        obj.vida = 0
-        if self.energia < 100:
-            self.energia += obj.energia
-            if self.energia > 100:
-                self.energia = 100
     def mover(self):
         self.energia -= 10
         if self.energia <= 0:
@@ -29,6 +24,10 @@ class animal(organismo):
         self.edad+=1
         if self.edad >= 40:
             self.vida = 0
+    def matar(self, presa):
+        presa.vida = 0
+        if self.energia < 100:
+            self.energia+= presa.energia * 0,10
             
 class planta(organismo):
     def __init__(self, vida, enegia,icono):
@@ -86,24 +85,50 @@ class ecosistema:
                                 self.espacio[k][j-v] = self.espacio[k][j]
                                 self.espacio[k][j] = 'x'
     def cazar(self):
-        for k in range(self.columnas):
-            for j in range(self.filas):
+        for k in range(self.columnas-1):
+            for j in range(self.filas-1):
                 if self.espacio[k][j] != 'x':
                     if self.espacio[k][j].dieta == "Carnivoro":
                         for r in range(1,self.espacio[k][j].rango+1):
-                            if self.espacio[k+r][j].dieta == "Herviboro" or self.espacio[k][j+r].dieta == "Herviboro" or self.espacio[k+r][j+r].dieta == "Herviboro" or self.espacio[k+r][j-r].dieta == "Herviboro" or self.espacio[k-r][j].dieta == "Herviboro" or self.espacio[k-r][j-r].dieta == "Herviboro" or self.espacio[k-r][j+r].dieta == "Herviboro"  or self.espacio[k][j-r].dieta == "Herviboro": 
-                                    
-animal1= animal(100, 100, 1,'L', "Leon",'Carnivoro',2)
-animal2= animal(100, 100, 1,'K', "Leon",'Carnivoro',2)
-animal3= animal(100, 100, 1,'J', "Leon",'Carnivoro',2)
-animal4= animal(100, 100, 1,'M', "Leon",'Carnivoro',2)
-animales= [animal1,animal2,animal3,animal4]
+                            if k + r >= self.columnas-1:
+                                r = (k+r)-(self.columnas-1) 
+                            if self.espacio[k+r][j] !='x' and self.espacio[k+r][j].dieta == "Herviboro":
+                                l= k-r-1
+                                self.espacio[k][j].cazar()
+                                v= self.espacio[k][j].velocidad
+                                if l-v == 1:
+                                    v = 1
+                                self.espacio[k-v][j] = self.espacio[k][j]
+                                self.espacio[k][j] = 'x'
+                                if self.espacio[k-l][j] == 0:
+                                   self.espacio[k-l][j].matar(self.espacio[k-l+1][j])                              
+                            elif self.espacio[k+r][j] !='x' and self.espacio[k][j+r].dieta == "Herviboro":
+                                l= j-r-1
+                                self.espacio[k][j].cazar()
+                                v= self.espacio[k][j].velocidad
+                                if l-v == 1:
+                                    v = 1
+                                self.espacio[k][j-v] = self.espacio[k][j]
+                                self.espacio[k][j] = 'x'
+                                if self.espacio[k][j-l] == 0:
+                                   self.espacio[k][j-l].matar(self.espacio[k][j-l+1])                                
+                            # elif self.espacio[k+r][j+r].dieta == "Herviboro":
+                            # elif self.espacio[k+r][j-r].dieta == "Herviboro":
+                            # elif self.espacio[k-r][j].dieta == "Herviboro":
+                            # elif self.espacio[k-r][j-r].dieta == "Herviboro":
+                            # elif self.espacio[k-r][j+r].dieta == "Herviboro":
+                            # elif self.espacio[k][j-r].dieta == "Herviboro":       
+animal1= animal(100, 100, 1,'Le', "Leon",'Carnivoro',2)
+animal3= animal(100, 100, 1,'Gac', "Gacela",'Herviboro',2)
+
+animales= [animal1,animal3]
 ecosistema1= ecosistema(10,10)
+ecosistema1.agregar(animal1)
+ecosistema1.agregar(animal3)
 while True:
-     var= ra.randint(0,3)
-     ecosistema1.agregar(animales[var])
      ecosistema1.mover()
      ecosistema1.mostrar()
+     ecosistema1.cazar()
      x=input()
     
                             
